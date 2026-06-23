@@ -4,11 +4,11 @@ namespace ActionsImporter.Commands;
 
 public class Migrate : BaseCommand
 {
-    private readonly string[] _args;
+    private readonly string[] _vendorArgs;
 
     public Migrate(string[] args)
     {
-        _args = args;
+        _vendorArgs = FilterWrapperOnlyArgs(args);
     }
 
     protected override string Name => "migrate";
@@ -37,6 +37,28 @@ public class Migrate : BaseCommand
         Description = "Use AI-assisted conversion with an LLM to convert workflows to GitHub Actions format."
     };
 
+    private static string[] FilterWrapperOnlyArgs(string[] args)
+    {
+        var filteredArgs = new List<string>();
+
+        for (var i = 0; i < args.Length; i++)
+        {
+            if (string.Equals(args[i], AiAssistedOption.Name, StringComparison.Ordinal))
+            {
+                if (i + 1 < args.Length && bool.TryParse(args[i + 1], out _))
+                {
+                    i++;
+                }
+
+                continue;
+            }
+
+            filteredArgs.Add(args[i]);
+        }
+
+        return filteredArgs.ToArray();
+    }
+
     protected override Command GenerateCommand(App app)
     {
         var command = base.GenerateCommand(app);
@@ -47,13 +69,13 @@ public class Migrate : BaseCommand
         command.AddGlobalOption(CommitMessage);
         command.AddGlobalOption(AiAssistedOption);
 
-        command.AddCommand(new AzureDevOps.Migrate(_args).Command(app));
-        command.AddCommand(new Bamboo.Migrate(_args).Command(app));
-        command.AddCommand(new Bitbucket.Migrate(_args).Command(app));
-        command.AddCommand(new Circle.Migrate(_args).Command(app));
-        command.AddCommand(new GitLab.Migrate(_args).Command(app));
-        command.AddCommand(new Jenkins.Migrate(_args).Command(app));
-        command.AddCommand(new Travis.Migrate(_args).Command(app));
+        command.AddCommand(new AzureDevOps.Migrate(_vendorArgs).Command(app));
+        command.AddCommand(new Bamboo.Migrate(_vendorArgs).Command(app));
+        command.AddCommand(new Bitbucket.Migrate(_vendorArgs).Command(app));
+        command.AddCommand(new Circle.Migrate(_vendorArgs).Command(app));
+        command.AddCommand(new GitLab.Migrate(_vendorArgs).Command(app));
+        command.AddCommand(new Jenkins.Migrate(_vendorArgs).Command(app));
+        command.AddCommand(new Travis.Migrate(_vendorArgs).Command(app));
 
         return command;
     }
