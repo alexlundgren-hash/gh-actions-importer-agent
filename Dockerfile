@@ -12,7 +12,7 @@ COPY src/global.json .
 RUN dotnet restore ActionsImporter/ActionsImporter.csproj
 RUN dotnet publish ActionsImporter/ActionsImporter.csproj \
     -c Release \
-    -r linux-x64 \
+    -r linux-musl-x64 \
     --self-contained \
     -o /app \
     -p:PublishSingleFile=true \
