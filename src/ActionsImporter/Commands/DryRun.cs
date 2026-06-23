@@ -8,7 +8,7 @@ public class DryRun : BaseCommand
 
     public DryRun(string[] args)
     {
-        _args = args;
+        _args = args.Where(arg => arg != "--ai-assisted").ToArray();
     }
 
     protected override string Name => "dry-run";
